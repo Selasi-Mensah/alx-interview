@@ -1,16 +1,40 @@
 #!/usr/bin/python3
+"""
+N queens
+"""
+
+
 import sys
 
 
-def print_usage():
-    """print usage"""
-    print("Usage: nqueens N")
-    sys.exit(1)
+def print_board(board):
+    """ print_board function
+    Args:
+        board - list of list with length sys.argv[1]
+    """
+    new_list = []
+    for i, row in enumerate(board):
+        value = []
+        for j, col in enumerate(row):
+            if col == 1:
+                value.append(i)
+                value.append(j)
+        new_list.append(value)
+
+    print(new_list)
 
 
-def is_valid_position(board, row, col):
-    """ Check if it's safe to place a queen at board[row][col] """
-    # Check this row on left side
+def isSafe(board, row, col, number):
+    """ isSafe function
+    Args:
+        board - list of list with length sys.argv[1]
+        row - row to check if is safe doing a movement in this position
+        col - col to check if is safe doing a movement in this position
+        number: size of the board
+    Return: True of False
+    """
+
+    # Check this row in the left side
     for i in range(col):
         if board[row][i] == 1:
             return False
@@ -20,65 +44,81 @@ def is_valid_position(board, row, col):
         if board[i][j] == 1:
             return False
 
-    # Check lower diagonal on left side
-    for i, j in zip(range(row, len(board), 1), range(col, -1, -1)):
+    for i, j in zip(range(row, number, 1), range(col, -1, -1)):
         if board[i][j] == 1:
             return False
 
     return True
 
 
-def solve_nqueens(board, col):
-    """ Use backtracking to solve the problem
+def solveNQUtil(board, col, number):
+    """ function to find the posibilities of answer
+    Args:
+        board - Board to resolve
+        col - Number of col
+        number - size of the board
+    Returns:
+        All the posibilites to solve the problem
     """
-    if col >= len(board):
-        # All queens are placed
-        solution = []
-        for i in range(len(board)):
-            for j in range(len(board)):
-                if board[i][j] == 1:
-                    solution.append([i, j])
-        solutions.append(solution)
-        return
 
-    """Consider this column and try placing this queen
-    in all rows one by one
-    """
-    for i in range(len(board)):
-        if is_valid_position(board, i, col):
+    if (col == number):
+        print_board(board)
+        return True
+    res = False
+    for i in range(number):
+
+        if (isSafe(board, i, col, number)):
+
+            # Place this queen in board[i][col]
             board[i][col] = 1
-            solve_nqueens(board, col + 1)
-            board[i][col] = 0  # backtrack
+
+            # Make result true if any placement
+            # is possible
+            res = solveNQUtil(board, col + 1, number) or res
+
+            board[i][col] = 0  # BACKTRACK
+
+    return res
 
 
-def main():
-    """The main function
+def solve(number):
+    """ function to find all the posibilities if exists
+    Args:
+        number - size of the board
     """
-    if len(sys.argv) != 2:
-        print_usage()
+    board = [[0 for i in range(number)]for i in range(number)]
 
-    try:
-        n = int(sys.argv[1])
-    except ValueError:
-        print("N must be a number")
-        sys.exit(1)
+    if not solveNQUtil(board, 0, number):
+        return False
 
-    if n < 4:
-        print("N must be at least 4")
-        sys.exit(1)
+    return True
 
-    # Initialize the chessboard
-    board = [[0] * n for _ in range(n)]
-    global solutions
-    solutions = []
 
-    # Solve the N Queens problem
-    solve_nqueens(board, 0)
-
-    # Print all solutions found
-    for solution in solutions:
-        print(solution)
+def validate(args):
+    """ function to validate the input data and to verify if the size to
+        answer is posible
+    Args:
+        args - sys.argv
+    """
+    if (len(args) == 2):
+        # Validate data
+        try:
+            number = int(args[1])
+        except Exception:
+            print("N must be a number")
+            exit(1)
+        if number < 4:
+            print("N must be at least 4")
+            exit(1)
+        return number
+    else:
+        print("Usage: nqueens N")
+        exit(1)
 
 
 if __name__ == "__main__":
-    main()
+    """ Main method to execute the application
+    """
+
+    number = validate(sys.argv)
+    solve(number)
